@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CS GO Randomizer</title>
+  <link rel="stylesheet" href="css/styles.css">
+</head>
+
+<body>
+  <section class="randomize">
+    <div class="container">
+      <div class="content">
+        <form class="myForm">
+          <input id="myInput" type="text" placeholder="enter name" name="fname" onsubmit="return validateForm()" required>
+          <button type="submit" id="myBtn">Add Player</button>
+        </form>
+      </div>
+      <div id="myList" class="my-list">
+      </div>
+      <div class="random-teams">
+        <button type="submit" id="randomizePlayerBtn" class="randomBtn">Random Teams</button>
+      </div>
+      <div class="teams">
+        <div class="first-team team"></div>
+        <div class="second-team team"></div>
+      </div>
+        <div class="map-wrapper">
+          <div class="map-checkboxes">
+            <label class="map-container">Nuke
+              <input type="checkbox" name="map" value="Nuke">
+              <span class="checkmark"></span>
+            </label>
+    
+            <label class="map-container">Inferno
+              <input type="checkbox" name="map" value="Inferno">
+              <span class="checkmark"></span>
+            </label>
+    
+            <label class="map-container">Dust
+              <input type="checkbox" name="map" value="Dust">
+              <span class="checkmark"></span>
+            </label>
+    
+            <label class="map-container">Mirage
+              <input type="checkbox" name="map" value="Mirage">
+              <span class="checkmark"></span>
+            </label>
+          </div>
+          <div class="map-result">Check maps and click random map</div>
+          <button type="submit" id="randomizeMapBtn" class="randomMapBtn map-item">Random Map</button>
+        </div>
+      </div>
+  </section>
+
+  <script src="./js/script.js"></script>
+</body>
+
+</html>
