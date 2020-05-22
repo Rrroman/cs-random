@@ -3,6 +3,11 @@
 @import url('https://fonts.googleapis.com/css2?family=Montserrat&display=swap');
 .reset();
 
+body {
+  background: rgb(12, 177, 240);
+  background: linear-gradient(90deg, rgba(12, 177, 240, 1) 20%, rgba(100, 227, 70, 1) 78%);
+}
+
 .container {
   .wrapper();
 }
@@ -12,27 +17,46 @@
 }
 
 .content {
-  padding: 100px 0 20px 0;
+  padding: 50px 0 20px 0;
   background-color: @color_first_stripe;
   .row-flex();
   justify-content: center;
 }
 
+.my-form {
+  width: 100%;
+}
 
 .my-list {
   min-height: 50px;
   .row-flex();
   flex-wrap: wrap;
-  justify-content: space-evenly;
+  flex-direction: column;
+  // justify-content: space-evenly;
   background-color: @color_second_stripe;
 }
 
 .player-name {
-  text-align: center;
+  margin-top: 5px;
   .col();
-  .size(2.4);
-  .size-md(5);
-  .size-sm(6);
+  .size(12);
+  // .size-md(12);
+  // .size-sm(12);
+  pointer-events: none;
+
+  &:hover {
+    opacity: 0.5;
+  }
+  &:before {
+    text-align: left;
+    pointer-events: all;
+    color: red;
+    font-weight: 900;
+    cursor: pointer;
+    margin-left: 5px;
+    margin-right: 15px;
+
+  }
 }
 
 .random-teams {
@@ -49,10 +73,43 @@
 }
 
 .team {
-  text-align: center;
+  // text-align: center;
+  font-weight: 900;
   padding: 10px;
   .col();
   .size(12);
+}
+
+.first-team__text,
+.second-team__text {
+  font-weight: 300;
+}
+
+.btn {
+  text-align: center;
+  cursor: pointer;
+  font-weight: 600;
+  padding: 3px 3px;
+  outline: none;
+  background-color: #29b864;
+  border: none;
+  border-radius: 5px;
+  box-shadow: 0 4px #95a5a6;
+
+  &:hover {
+    background-color: #2ecc71;
+  }
+
+  &:active {
+    background-color: #2ecc71;
+    box-shadow: 0 5px #95a5a6;
+    transform: translateY(4px);
+  }
+
+  &:disabled {
+    background-color: #29b864;
+    cursor: auto;
+  }
 }
 
 .randomBtn {
@@ -140,19 +197,19 @@
 }
 
 /* Create the checkmark/indicator (hidden when not checked) */
-.checkmark:after {
+.checkmark:before {
   content: "";
   position: absolute;
   display: none;
 }
 
 /* Show the checkmark when checked */
-.map-container input:checked~.checkmark:after {
+.map-container input:checked~.checkmark:before {
   display: block;
 }
 
 /* Style the checkmark/indicator */
-.map-container .checkmark:after {
+.map-container .checkmark:before {
   left: 9px;
   top: 5px;
   width: 5px;
@@ -164,6 +221,68 @@
   transform: rotate(45deg);
 }
 
+.paste-name {
+  color: @color_second_stripe;
+  font-size: 17px;
+  font-weight: 800;
+  height: 20px;
+  padding: 3px;
+}
+
+.party-id {
+  color: @color_first_stripe;
+  font-size: 17px;
+  font-weight: 800;
+  height: 20px;
+  padding-top: 3px;
+}
+
+.party {
+  .row-flex();
+  justify-content: center;
+
+  &__link {
+    font-weight: 800;
+    text-align: center;
+    .col();
+    .size(12);
+  }
+
+  &__btn {
+    margin: 10px 10px 20px 10px;
+  }
+
+}
+
+.joinInput {
+  margin: 10px;
+}
+
+.userInput {
+  margin: 10px;
+}
+
+.group-element-block {
+  justify-content: center;
+  text-align: center;
+  background: @color_second_stripe;
+}
+
+
+
+.btn-block {
+  margin: 10px;
+  display: flex;
+  flex-direction: column;
+}
+
+.second-stripe {
+  background: @color_second_stripe;
+}
+
+.first-stripe {
+  background: @color_first_stripe;
+}
 
 
 // .degubGrid {

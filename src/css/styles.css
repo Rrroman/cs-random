@@ -102,6 +102,10 @@ img {
   max-width: 100%;
   height: auto;
 }
+body {
+  background: #0cb1f0;
+  background: linear-gradient(90deg, #0cb1f0 20%, #64e346 78%);
+}
 .container {
   max-width: 1280px;
   margin: 0 auto;
@@ -112,13 +116,16 @@ img {
   font-family: 'Montserrat', sans-serif;
 }
 .content {
-  padding: 100px 0 20px 0;
-  background-color: #7db3fa;
+  padding: 50px 0 20px 0;
+  background-color: #2196F3;
   display: flex;
   flex-wrap: wrap;
   margin-left: -15px;
   margin-right: -15px;
   justify-content: center;
+}
+.my-form {
+  width: 100%;
 }
 .my-list {
   min-height: 50px;
@@ -126,30 +133,33 @@ img {
   margin-left: -15px;
   margin-right: -15px;
   flex-wrap: wrap;
-  justify-content: space-evenly;
+  flex-direction: column;
   background-color: #a7f091;
 }
 .player-name {
-  text-align: center;
+  margin-top: 5px;
   box-sizing: border-box;
   word-wrap: break-word;
   margin-left: 15px;
   margin-right: 15px;
-  width: calc(20% - 30px);
+  width: calc(100% - 30px);
+  pointer-events: none;
 }
-@media screen and (max-width: 920px) {
-  .player-name {
-    width: calc(41.66666666666667% - 30px);
-  }
+.player-name:hover {
+  opacity: 0.5;
 }
-@media screen and (max-width: 720px) {
-  .player-name {
-    width: calc(50% - 30px);
-  }
+.player-name:before {
+  text-align: left;
+  pointer-events: all;
+  color: red;
+  font-weight: 900;
+  cursor: pointer;
+  margin-left: 5px;
+  margin-right: 15px;
 }
 .random-teams {
   padding: 10px;
-  background-color: #7db3fa;
+  background-color: #2196F3;
   display: flex;
   flex-wrap: wrap;
   margin-left: -15px;
@@ -162,16 +172,43 @@ img {
   flex-wrap: wrap;
   margin-left: -15px;
   margin-right: -15px;
-  background-color: #7db3fa;
+  background-color: #2196F3;
 }
 .team {
-  text-align: center;
+  font-weight: 900;
   padding: 10px;
   box-sizing: border-box;
   word-wrap: break-word;
   margin-left: 15px;
   margin-right: 15px;
   width: calc(100% - 30px);
+}
+.first-team__text,
+.second-team__text {
+  font-weight: 300;
+}
+.btn {
+  text-align: center;
+  cursor: pointer;
+  font-weight: 600;
+  padding: 3px 3px;
+  outline: none;
+  background-color: #29b864;
+  border: none;
+  border-radius: 5px;
+  box-shadow: 0 4px #95a5a6;
+}
+.btn:hover {
+  background-color: #2ecc71;
+}
+.btn:active {
+  background-color: #2ecc71;
+  box-shadow: 0 5px #95a5a6;
+  transform: translateY(4px);
+}
+.btn:disabled {
+  background-color: #29b864;
+  cursor: auto;
 }
 .randomBtn {
   margin: 10px 0 0 0;
@@ -265,17 +302,17 @@ img {
   background-color: #2196F3;
 }
 /* Create the checkmark/indicator (hidden when not checked) */
-.checkmark:after {
+.checkmark:before {
   content: "";
   position: absolute;
   display: none;
 }
 /* Show the checkmark when checked */
-.map-container input:checked ~ .checkmark:after {
+.map-container input:checked ~ .checkmark:before {
   display: block;
 }
 /* Style the checkmark/indicator */
-.map-container .checkmark:after {
+.map-container .checkmark:before {
   left: 9px;
   top: 5px;
   width: 5px;
@@ -285,4 +322,59 @@ img {
   -webkit-transform: rotate(45deg);
   -ms-transform: rotate(45deg);
   transform: rotate(45deg);
+}
+.paste-name {
+  color: #a7f091;
+  font-size: 17px;
+  font-weight: 800;
+  height: 20px;
+  padding: 3px;
+}
+.party-id {
+  color: #2196F3;
+  font-size: 17px;
+  font-weight: 800;
+  height: 20px;
+  padding-top: 3px;
+}
+.party {
+  display: flex;
+  flex-wrap: wrap;
+  margin-left: -15px;
+  margin-right: -15px;
+  justify-content: center;
+}
+.party__link {
+  font-weight: 800;
+  text-align: center;
+  box-sizing: border-box;
+  word-wrap: break-word;
+  margin-left: 15px;
+  margin-right: 15px;
+  width: calc(100% - 30px);
+}
+.party__btn {
+  margin: 10px 10px 20px 10px;
+}
+.joinInput {
+  margin: 10px;
+}
+.userInput {
+  margin: 10px;
+}
+.group-element-block {
+  justify-content: center;
+  text-align: center;
+  background: #a7f091;
+}
+.btn-block {
+  margin: 10px;
+  display: flex;
+  flex-direction: column;
+}
+.second-stripe {
+  background: #a7f091;
+}
+.first-stripe {
+  background: #2196F3;
 }

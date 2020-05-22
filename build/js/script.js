@@ -1,36 +1,197 @@
-let myBtn = document.querySelector('#myBtn'),
-  myInput = document.querySelector('#myInput'),
+let addPlayerBtn = document.querySelector('#addPlayerBtn'),
+  delAllPlayers = document.querySelector('#delAllPlayers'),
+  randomizeTeam = document.querySelector('#randomizeTeam'),
+  joinInput = document.querySelector('#joinInput'),
+  userInput = document.querySelector('#userInput'),
   myList = document.querySelector('#myList'),
+  createPartyBtn = document.querySelector('#createPartyBtn'),
+  joinPartyBtn = document.querySelector('#joinPartyBtn'),
   firstTeam = document.querySelector('.first-team'),
   secondTeam = document.querySelector('.second-team'),
-  mapResult = document.querySelector('.map-result'),
+  pasteName = document.querySelector('.paste-name'),
+  partyId = document.querySelector('.party-id'),
+  partyLink = document.querySelector('.party__link'),
+  usersJsonPath = "http://192.168.0.101:5000/users",
+  teamsJsonPath = "http://192.168.0.101:5000/teams",
+  partyJsonPath = "http://192.168.0.101:5000/party",
+  socket = io.connect("http://192.168.0.101:5000"),
+  folderNumber,
   firstArr = [],
   secondArr = [],
-  randomizePlayerBtn = document.querySelector('#randomizePlayerBtn');
+  allNamesArr = [],
+  firstTeamArr = [],
+  secondTeamArr = [],
+  request = new XMLHttpRequest();
 
-myBtn.addEventListener('click', function (event) {
+
+
+createPartyBtn.addEventListener('click', function (event) {
+  event.preventDefault();
+  addPlayerBtn.disabled = false;
+  delAllPlayers.disabled = false;
+  randomizeTeam.disabled = false;
+  removeName();
+  loadJSON(function (json) {
+    partyId = json.partyId;
+    partyLink.innerHTML = `Party ID: ${partyId}`;
+  }, partyJsonPath);
+})
+
+joinPartyBtn.addEventListener('click', function (event) {
+  event.preventDefault();
+  removeName();
+  addPlayerBtn.disabled = false;
+  delAllPlayers.disabled = false;
+  randomizeTeam.disabled = false;
+  partyId = joinInput.value;
+
+  if (partyId == undefined || partyId == "" || partyId == null) {
+    partyId.innerHTML = "Please enter party id";
+    return false;
+  } 
+
+  loadJSON(function (json) {
+    allNamesArr = json.users;
+    for (let i = 0; i < allNamesArr.length; i++) {
+      let div = document.createElement("div");
+      div.className = 'player-name';
+      let str = "X";
+      document.styleSheets[0].addRule('div.player-name:before', 'content: "' + str + '";');
+      let printName = document.createTextNode(allNamesArr[i]);
+      div.appendChild(printName);
+      document.getElementById("myList").appendChild(div);
+    }
+    let playerName = document.querySelectorAll('.player-name');
+    playerName.forEach(element => {
+      removeOnePlayer(element);
+    });
+  }, usersJsonPath + '/' + partyId);
+
+  loadJSON(function (json) {
+    firstTeamArr = json.firstTeam;
+    secondTeamArr = json.secondTeam;
+
+    if (Array.isArray(firstTeamArr) && firstTeamArr.length || Array.isArray(secondTeamArr) && secondTeamArr.length) {
+      createTeam(firstTeamArr, secondTeamArr);
+    }
+    else {
+      console.log("Error in script.js - array firstTeamArr or secondTeamArr is empty");
+    }
+  }, teamsJsonPath + '/' + partyId);
+
+})
+
+addPlayerBtn.addEventListener('click', function (event) {
   event.preventDefault();
   validateForm();
 })
 
-randomizePlayerBtn.addEventListener('click', function (event) {
+delAllPlayers.addEventListener('click', function (event) {
   event.preventDefault();
-  random()
+  socket.emit('delAllPlayers');
+})
+socket.on('delAllPlayers', function () {
+  removeName();
+  deleteTeams();
 })
 
-function addPlayer() {
-  let div = document.createElement("div");
-  div.className = 'player-name';
-  let textNode = document.createTextNode(myInput.value);
-  div.appendChild(textNode);
-  document.getElementById("myList").appendChild(div);
-  myInput.value = "";
+randomizeTeam.addEventListener('click', function (event) {
+  event.preventDefault();
+  random(allNamesArr);
+})
+
+
+function deletePlayers() {
+  request.open("DELETE", usersJsonPath);
+  request.setRequestHeader("Content-Type", "application/json;charset=UTF-8");
+  request.send();
+  request.onload = () => {
+    if (request.status === 200) {
+    } else {
+      console.log(`error ${request.status} ${request.statusText}`);
+    };
+    loadJSON(function (json) {
+      return allNamesArr = json.users;
+    }, usersJsonPath);
+  };
 }
 
+function deleteTeams() {
+  request.open("DELETE", teamsJsonPath);
+  request.setRequestHeader("Content-Type", "application/json;charset=UTF-8");
+  request.send();
+  request.onload = () => {
+    if (request.status === 200) {
+    } else {
+      console.log(`error ${request.status} ${request.statusText}`);
+    }
+    deletePlayers();
+  };
+}
+
+function removeName() {
+  myList.innerHTML = "";
+  firstTeam.innerHTML = `<span>Team 1:</span>`;
+  secondTeam.innerHTML = `<span> Team 2:</span>`;
+}
+
+function removeTeams() {
+  firstTeam.innerHTML = `<span>Team 1:</span>`;
+  secondTeam.innerHTML = `<span> Team 2:</span>`;
+}
+
+function remove(el) {
+  let element = el;
+  element.remove();
+}
+
+function addPlayer() {
+  let textNode = document.createTextNode(userInput.value);  
+
+
+
+  userInput.value = "";
+
+  let jsonData = {
+    "partyId": partyId,
+    "newUser": textNode.data
+  }
+
+  request.open("POST", usersJsonPath);
+  request.setRequestHeader("Content-Type", "application/json;charset=UTF-8");
+  request.send(JSON.stringify(jsonData));
+  request.onload = () => {
+    if (request.status === 200) {
+    } else {
+      console.log(`error ${request.status} ${request.statusText}`);
+    }
+    loadJSON(function (json) {
+      let playerName = document.querySelectorAll('.player-name');
+      playerName.forEach(element => {
+        removeOnePlayer(element);
+      });
+      return allNamesArr = json.users;
+    }, usersJsonPath);
+  };
+  socket.emit('addPlayerData', jsonData);
+}
+
+socket.on('addPlayerData', function (data) {
+  data = JSON.parse(data);
+  // let textNode = document.createTextNode(userInput.value);
+  let textNode = document.createTextNode(data.newUser);
+  let div = document.createElement("div");
+  div.className = 'player-name';
+  let str = "X";
+  document.styleSheets[0].addRule('div.player-name:before', 'content: "' + str + '";');
+  div.appendChild(textNode);
+  document.getElementById("myList").appendChild(div);
+})
+
 function validateForm() {
-  let x = myInput.value;
+  let x = userInput.value;
   if (x == "" || x == null) {
-    alert("Name must be filled out");
+    pasteName.innerHTML = "Name must be filled out";
     return false;
   } else {
     addPlayer();
@@ -38,79 +199,140 @@ function validateForm() {
 }
 
 function random() {
-  let allNamesArr = [];
-  let allNames = document.querySelectorAll('.player-name');
-  
-  allNames.forEach(function (elem) {
-    allNamesArr.push(elem.innerText);
+  request.open("POST", teamsJsonPath);
+  request.setRequestHeader("Content-Type", "application/json;charset=UTF-8");
+  request.send();
+  request.onload = () => {
+    if (request.status === 200) {
+    } else {
+      console.log(`error ${request.status} ${request.statusText}`);
+    }
+    loadJSON(function (json) {
+      firstTeamArr = json.firstTeam;
+      secondTeamArr = json.secondTeam;
+      createTeam(firstTeamArr, secondTeamArr);
+      socket.emit('randomizeTeam', json);
+    }, teamsJsonPath);
+  };
+  socket.on('randomizeTeam', function (data) {
+    data = JSON.parse(data);
+    firstTeamArr = data.firstTeam;
+    secondTeamArr = data.secondTeam;
+    createTeam(firstTeamArr, secondTeamArr);
   })
-
-  // // without forEach version
-  // for (let i = 0; i < allNames.length; i++) {
-  //   allNamesArr.push(allNames[i].innerText);
-  // }
-
-  shuffle(allNamesArr);
-
-  firstArr = allNamesArr.slice(0, 5);
-  secondArr = allNamesArr.slice(5, 10);
-  console.log(firstArr);
-  console.log(secondArr);
-  
-  createTeam(firstArr, secondArr);
-}
-
-function shuffle(array) {
-  let currentIndex = array.length, temporaryValue, randomIndex;
-
-  // While there remain elements to shuffle...
-  while (0 !== currentIndex) {
-
-    // Pick a remaining element...
-    randomIndex = Math.floor(Math.random() * currentIndex);
-    currentIndex -= 1;
-
-    // And swap it with the current element.
-    temporaryValue = array[currentIndex];
-    array[currentIndex] = array[randomIndex];
-    array[randomIndex] = temporaryValue;
-  }
-
-  return array;
-}
-
-function createTeam(firstArr, secondArr) {
-  let firstStr = firstArr.join(', ');
-  let secondStr = secondArr.join(', ');
-
-  console.log(firstStr);
-  console.log(secondStr);
-  firstTeam.innerHTML = `<span>Team 1:</span> ${firstStr}`;
-  secondTeam.innerHTML = `<span>Team 2:</span> ${secondStr}`;
 }
 
 
-function getSelectedCheckboxValues(name) {
-  const checkboxes = document.querySelectorAll(`input[name="${name}"]:checked`);
-  let values = [];
-  checkboxes.forEach((checkbox) => {
-    // this validate don't works
-    if (checkbox.checked == false ){
-      mapResult.innerHTML = `Check maps for random`;
-      return false;
-    } else {      
-      values.push(checkbox.value);
+function createTeam(firstTeamArr, secondTeamArr) {
+  let firstStr = firstTeamArr.join(', ');
+  let secondStr = secondTeamArr.join(', ');
+
+  firstTeam.innerHTML = `<span>Team 1: </span> <span class="first-team__text">${firstStr}</span>`;
+  secondTeam.innerHTML = `<span>Team 2: </span> <span class="second-team__text">${secondStr}</span>`;
+
+}
+
+
+function loadJSON(callback, path) {
+  var xObj = new XMLHttpRequest();
+  xObj.overrideMimeType("application/json");
+  xObj.open('GET', path, true);
+  xObj.onreadystatechange = function () {
+    if (xObj.readyState == 4 && xObj.status == "200") {
+      callback(JSON.parse(xObj.responseText));
+    }
+  };
+  xObj.send(null);
+}
+
+// window.onload = loadJSON(function (json) {
+//   allNamesArr = json.users;
+//   for (let i = 0; i < allNamesArr.length; i++) {
+//     let div = document.createElement("div");
+//     div.className = 'player-name';
+//     let str = "X";
+//     document.styleSheets[0].addRule('div.player-name:before', 'content: "' + str + '";');
+//     let printName = document.createTextNode(allNamesArr[i]);
+//     div.appendChild(printName);
+//     document.getElementById("myList").appendChild(div);
+//   }
+//   let playerName = document.querySelectorAll('.player-name');
+//   playerName.forEach(element => {
+//     removeOnePlayer(element);
+//   });
+
+//   return allNamesArr;
+// }, usersJsonPath);
+
+function removeOnePlayer(element) {
+    element.addEventListener('click', function () {
+      // console.log(this);
+      // console.log(this.innerHTML);
+      // let delElem = this.outerHTML;
+      let delElem = this.innerHTML;
+      let delElemObj = {
+        "delElem": delElem,
+      }
+      socket.emit('removeOnePlayer', delElemObj);
+      // socket.on('removeOnePlayer', function (data) {
+      //     data = JSON.parse(data);
+      //     let elementToDel = data.delElem;
+      //     let elList = document.querySelectorAll(".player-name");
+      //     elList.forEach(function (el) {
+      //       if (el.innerHTML.indexOf(elementToDel) !== -1) {
+      //         console.log(el);
+      //         remove(el);
+      //       }
+      //     });
+      //     removeTeams();
+      //   })
+
+      let playerDelFromArr = {
+        "partyId": partyId,
+        "delUser": this.innerHTML
+      }
+      // remove(this);
+      // removeTeams();
+
+      request.open("POST", usersJsonPath);
+      request.setRequestHeader("Content-Type", "application/json;charset=UTF-8");
+      request.send(JSON.stringify(playerDelFromArr));
+      request.onload = () => {
+        if (request.status === 200) {
+          // socket.emit('removeOnePlayer', delElemObj);
+        } else {
+          console.log(`error ${request.status} ${request.statusText}`);
+        };
+        // loadJSON(function (json) {
+        //   return allNamesArr = json.users;
+        // }, usersJsonPath);
+
+      };
+      // socket.emit('removeOnePlayer', delElemObj);
+    })
+}
+socket.on('removeOnePlayer', function (data) {
+  data = JSON.parse(data);
+  let elementToDel = data.delElem;
+  let playerName = document.querySelectorAll(".player-name");
+  playerName.forEach(function (el) {
+    if (el.innerHTML.indexOf(elementToDel) !== -1) {
+      console.log(el);
+      remove(el);
     }
   });
-  return values;
-}
+  removeTeams();
+})
 
-const btn = document.querySelector('#randomizeMapBtn');
-btn.addEventListener('click', (event) => {
-  let checkedMaps = [];
-  checkedMaps = getSelectedCheckboxValues('map');
-  shuffle(checkedMaps);
-  checkedMaps = checkedMaps.slice(0, 1)
-  mapResult.innerHTML = checkedMaps;
-});
+// window.onload = loadJSON(function (json) {
+//   firstTeamArr = json.firstTeam;
+//   secondTeamArr = json.secondTeam;
+
+//   if (Array.isArray(firstTeamArr) && firstTeamArr.length || Array.isArray(secondTeamArr) && secondTeamArr.length) {
+//     createTeam(firstTeamArr, secondTeamArr);
+//   }
+//   else {
+//     console.log("Error in script.js - array firstTeamArr or secondTeamArr is empty");
+//   }
+// }, teamsJsonPath);
 

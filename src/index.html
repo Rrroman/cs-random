@@ -12,21 +12,36 @@
   <section class="randomize">
     <div class="container">
       <div class="content">
-        <form class="myForm">
-          <input id="myInput" type="text" placeholder="enter name" name="fname" onsubmit="return validateForm()" required>
-          <button type="submit" id="myBtn">Add Player</button>
+        <form class="my-form">
+          <div class="party">
+            <div class="party__link">Party ID</div>
+            <div class="btn-block">
+              <button type="submit" class="party__btn create_btn btn" id="createPartyBtn">Create party</button>
+            </div>
+          </div>
+          <div class="group-element-block">
+            <div class="party-id"></div>
+            <input id="joinInput" class="joinInput" type="text" placeholder="enter party code" name="joinInput" onsubmit="return validateForm()" required>
+            <button type="submit" class="party__btn btn" id="joinPartyBtn">Join party</button>
+          </div>
+          <div class="group-element-block first-stripe">
+            <div class="paste-name"></div>
+            <input id="userInput" class="userInput" type="text" placeholder="enter name" name="userInput" onsubmit="return validateForm()" required>
+            <button type="submit" id="addPlayerBtn" class="party__btn btn" disabled>Add Player</button>
+            <button type="submit" id="delAllPlayers" class="party__btn btn" disabled>Delete All Players</button>
+          </div>
         </form>
       </div>
       <div id="myList" class="my-list">
       </div>
       <div class="random-teams">
-        <button type="submit" id="randomizePlayerBtn" class="randomBtn">Random Teams</button>
+        <button type="submit" id="randomizeTeam" class="randomBtn btn" disabled>Random Teams</button>
       </div>
       <div class="teams">
-        <div class="first-team team"></div>
-        <div class="second-team team"></div>
+        <div class="team"><span class="first-team team">Team 1:</span></div>
+        <div class="team"><span class="second-team team">Team 2:</span></div>
       </div>
-        <div class="map-wrapper">
+      <!-- <div class="map-wrapper">
           <div class="map-checkboxes">
             <label class="map-container">Nuke
               <input type="checkbox" name="map" value="Nuke">
@@ -50,10 +65,10 @@
           </div>
           <div class="map-result">Check maps and click random map</div>
           <button type="submit" id="randomizeMapBtn" class="randomMapBtn map-item">Random Map</button>
-        </div>
-      </div>
+        </div> -->
+    </div>
   </section>
-
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/2.3.0/socket.io.dev.js"></script>
   <script src="./js/script.js"></script>
 </body>
 
