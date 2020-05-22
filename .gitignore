@@ -85,4 +85,4 @@ typings/
 .dynamodb/
 
 party/*
-party/!.gitkeep
+!party/.gitkeep
