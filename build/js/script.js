@@ -1,6 +1,6 @@
 let addPlayerBtn = document.querySelector('#addPlayerBtn'),
-  delAllPlayers = document.querySelector('#delAllPlayers'),
-  randomizeTeam = document.querySelector('#randomizeTeam'),
+  delAllPlayersBtn = document.querySelector('#delAllPlayers'),
+  randomizeTeamBtn = document.querySelector('#randomizeTeam'),
   joinInput = document.querySelector('#joinInput'),
   userInput = document.querySelector('#userInput'),
   myList = document.querySelector('#myList'),
@@ -23,7 +23,6 @@ let addPlayerBtn = document.querySelector('#addPlayerBtn'),
   secondTeamArr = [],
   request = new XMLHttpRequest();
 
-// TO DO this need to make request with ulr params to backend partyId
 const urlParams = new URLSearchParams(window.location.search);
 const myParam = urlParams.get('myParam');
 function getParameterByName(name, url) {
@@ -36,13 +35,15 @@ function getParameterByName(name, url) {
   return decodeURIComponent(results[2].replace(/\+/g, ' '));
 }
 let partyId = getParameterByName('partyId');
+
 console.log(partyId);
+
 
 createPartyBtn.addEventListener('click', function (event) {
   event.preventDefault();
   addPlayerBtn.disabled = false;
-  delAllPlayers.disabled = false;
-  randomizeTeam.disabled = false;
+  delAllPlayersBtn.disabled = false;
+  randomizeTeamBtn.disabled = false;
   removeName();
   loadJSON(function (json) {
     partyId = json.partyId;
@@ -55,11 +56,10 @@ sharePartyBtn.addEventListener('click', function (event) {
   copy(partyId);
 })
 
-// url with party number
 function copy(text) {
   let input = document.createElement('textarea');
   // text = `http://localhost:3000/?partyId=${text}`;
-  text = `http://localhost:3000/cs/src/?partyId=${text}`;
+  text = `http://localhost/cs/src/?partyId=${text}`;
   input.innerHTML = text;
   document.body.appendChild(input);
   input.select();
@@ -68,19 +68,18 @@ function copy(text) {
   return result;
 }
 
-
-
+joinPartyBtn.addEventListener('click', (event) => {
+  joinPartyValidation(event);
+})
 
 joinPartyBtn.addEventListener('click', () => {
   loadUsersTeamsData(partyId);
-})
-joinPartyBtn.addEventListener('click', (event) => {
-  joinPartyValidation(event);
 })
 
 window.addEventListener('load', () => {
   loadUsersTeamsData(partyId);
 })
+
 window.addEventListener('load', (event) => {
   joinParty(event);
 })
@@ -92,7 +91,7 @@ function joinPartyValidation(event) {
   if (joinInputValue == undefined || joinInputValue == "" || joinInputValue == null) {
     let partyIdValue = document.querySelector('.party-id');
     console.log(typeof (joinInputValue) + " if undef or null or ''");
-    randomizeTeam.disabled = true;
+    randomizeTeamBtn.disabled = true;
     partyIdValue.innerHTML = "Please enter party id";
     return false;
   } else {
@@ -104,19 +103,20 @@ function joinPartyValidation(event) {
   }
   removeName();
   addPlayerBtn.disabled = false;
-  delAllPlayers.disabled = false;
 }
 function joinParty(event) {
   event.preventDefault();
-  loadUsersTeamsData(partyId);
-  partyLink.innerHTML = `Party ID: ${partyId}`;
   removeName();
+  loadUsersTeamsData(partyId);
   addPlayerBtn.disabled = false;
-  delAllPlayers.disabled = false;
+  if (partyId !== null){
+    partyLink.innerHTML = `Party ID: ${partyId}`;
+  }
 }
 
 function loadUsersTeamsData(partyId) {
   loadJSON(function (json) {
+    myList.innerHTML = "";
     allNamesArr = json.users;
     for (let i = 0; i < allNamesArr.length; i++) {
       let div = document.createElement("div");
@@ -151,16 +151,16 @@ addPlayerBtn.addEventListener('click', function (event) {
   validateForm();
 })
 
-delAllPlayers.addEventListener('click', function (event) {
+delAllPlayersBtn.addEventListener('click', function (event) {
   event.preventDefault();
-  socket.emit('delAllPlayers');
+  socket.emit('delAllPlayersBtn');
 })
-socket.on('delAllPlayers', function () {
+socket.on('delAllPlayersBtn', function () {
   removeName();
   deleteTeams();
 })
 
-randomizeTeam.addEventListener('click', function (event) {
+randomizeTeamBtn.addEventListener('click', function (event) {
   event.preventDefault();
   random(allNamesArr);
 })
@@ -196,13 +196,13 @@ function deleteTeams() {
 
 function removeName() {
   myList.innerHTML = "";
-  firstTeam.innerHTML = `<span>Team 1:</span>`;
-  secondTeam.innerHTML = `<span> Team 2:</span>`;
+  firstTeam.innerHTML = `<span>Team 1:</span><br>`;
+  secondTeam.innerHTML = `<span>Team 2:</span><br>`;
 }
 
 function removeTeams() {
-  firstTeam.innerHTML = `<span>Team 1:</span>`;
-  secondTeam.innerHTML = `<span> Team 2:</span>`;
+  firstTeam.innerHTML = `<span>Team 1:</span><br>`;
+  secondTeam.innerHTML = `<span>Team 2:</span><br>`;
 }
 
 function remove(el) {
@@ -212,8 +212,6 @@ function remove(el) {
 
 function addPlayer() {
   let textNode = document.createTextNode(userInput.value);
-
-
 
   userInput.value = "";
 
@@ -258,7 +256,6 @@ function validateForm() {
     pasteName.innerHTML = "Name must be filled out";
     return false;
   } else {
-    randomizeTeam.disabled = false;
     addPlayer();
   }
 }
@@ -276,10 +273,10 @@ function random() {
       firstTeamArr = json.firstTeam;
       secondTeamArr = json.secondTeam;
       createTeam(firstTeamArr, secondTeamArr);
-      socket.emit('randomizeTeam', json);
+      socket.emit('randomizeTeamBtn', json);
     }, teamsJsonPath);
   };
-  socket.on('randomizeTeam', function (data) {
+  socket.on('randomizeTeamBtn', function (data) {
     data = JSON.parse(data);
     firstTeamArr = data.firstTeam;
     secondTeamArr = data.secondTeam;
@@ -292,8 +289,8 @@ function createTeam(firstTeamArr, secondTeamArr) {
   let firstStr = firstTeamArr.join(', ');
   let secondStr = secondTeamArr.join(', ');
 
-  firstTeam.innerHTML = `<span>Team 1: </span> <span class="first-team__text">${firstStr}</span>`;
-  secondTeam.innerHTML = `<span>Team 2: </span> <span class="second-team__text">${secondStr}</span>`;
+  firstTeam.innerHTML = `<span>Team 1: </span><br><span class="first-team__text">${firstStr}</span>`;
+  secondTeam.innerHTML = `<span>Team 2: </span><br><span class="second-team__text">${secondStr}</span>`;
 
 }
 
