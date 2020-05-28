@@ -19,8 +19,6 @@ let teamsObj = {
   "secondTeam": []
 };
 
-let emptyTeam = [1,2,,4,20];
-[ , 4,1, 2, 20]
 
 app.use(cors());
 app.use(bodyParser.json());
@@ -64,7 +62,6 @@ app.get('/teams/:partyId', function (req, res) {
     res.send(JSON.parse(jsonContent));
   });
   }
-
 })
 
 

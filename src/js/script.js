@@ -1,15 +1,15 @@
 let addPlayerBtn = document.querySelector('#addPlayerBtn'),
-  delAllPlayers = document.querySelector('#delAllPlayers'),
-  randomizeTeam = document.querySelector('#randomizeTeam'),
+  delAllPlayersBtn = document.querySelector('#delAllPlayers'),
+  randomizeTeamBtn = document.querySelector('#randomizeTeam'),
   joinInput = document.querySelector('#joinInput'),
   userInput = document.querySelector('#userInput'),
   myList = document.querySelector('#myList'),
   createPartyBtn = document.querySelector('#createPartyBtn'),
+  sharePartyBtn = document.querySelector('.share-party__btn'),
   joinPartyBtn = document.querySelector('#joinPartyBtn'),
   firstTeam = document.querySelector('.first-team'),
   secondTeam = document.querySelector('.second-team'),
   pasteName = document.querySelector('.paste-name'),
-  partyId = document.querySelector('.party-id'),
   partyLink = document.querySelector('.party__link'),
   usersJsonPath = "http://192.168.0.101:5000/users",
   teamsJsonPath = "http://192.168.0.101:5000/teams",
@@ -23,13 +23,27 @@ let addPlayerBtn = document.querySelector('#addPlayerBtn'),
   secondTeamArr = [],
   request = new XMLHttpRequest();
 
+const urlParams = new URLSearchParams(window.location.search);
+const myParam = urlParams.get('myParam');
+function getParameterByName(name, url) {
+  if (!url) url = window.location.href;
+  name = name.replace(/[\[\]]/g, '\\$&');
+  let regex = new RegExp('[?&]' + name + '(=([^&#]*)|&|#|$)'),
+    results = regex.exec(url);
+  if (!results) return null;
+  if (!results[2]) return '';
+  return decodeURIComponent(results[2].replace(/\+/g, ' '));
+}
+let partyId = getParameterByName('partyId');
+
+console.log(partyId);
 
 
 createPartyBtn.addEventListener('click', function (event) {
   event.preventDefault();
   addPlayerBtn.disabled = false;
-  delAllPlayers.disabled = false;
-  randomizeTeam.disabled = false;
+  delAllPlayersBtn.disabled = false;
+  randomizeTeamBtn.disabled = false;
   removeName();
   loadJSON(function (json) {
     partyId = json.partyId;
@@ -37,20 +51,72 @@ createPartyBtn.addEventListener('click', function (event) {
   }, partyJsonPath);
 })
 
-joinPartyBtn.addEventListener('click', function (event) {
+sharePartyBtn.addEventListener('click', function (event) {
   event.preventDefault();
+  copy(partyId);
+})
+
+function copy(text) {
+  let input = document.createElement('textarea');
+  // text = `http://localhost:3000/?partyId=${text}`;
+  text = `http://localhost/cs/src/?partyId=${text}`;
+  input.innerHTML = text;
+  document.body.appendChild(input);
+  input.select();
+  let result = document.execCommand('copy');
+  document.body.removeChild(input);
+  return result;
+}
+
+joinPartyBtn.addEventListener('click', (event) => {
+  joinPartyValidation(event);
+})
+
+joinPartyBtn.addEventListener('click', () => {
+  loadUsersTeamsData(partyId);
+})
+
+window.addEventListener('load', () => {
+  loadUsersTeamsData(partyId);
+})
+
+window.addEventListener('load', (event) => {
+  joinParty(event);
+})
+
+
+function joinPartyValidation(event) {
+  event.preventDefault();
+  joinInputValue = joinInput.value;
+  if (joinInputValue == undefined || joinInputValue == "" || joinInputValue == null) {
+    let partyIdValue = document.querySelector('.party-id');
+    console.log(typeof (joinInputValue) + " if undef or null or ''");
+    randomizeTeamBtn.disabled = true;
+    partyIdValue.innerHTML = "Please enter party id";
+    return false;
+  } else {
+    let partyIdValue = document.querySelector('.party-id');
+    partyIdValue.innerHTML = "";
+    joinInput.value = "";
+    partyId = joinInputValue;
+    partyLink.innerHTML = `Party ID: ${partyId}`;
+  }
   removeName();
   addPlayerBtn.disabled = false;
-  delAllPlayers.disabled = false;
-  randomizeTeam.disabled = false;
-  partyId = joinInput.value;
+}
+function joinParty(event) {
+  event.preventDefault();
+  removeName();
+  loadUsersTeamsData(partyId);
+  addPlayerBtn.disabled = false;
+  if (partyId !== null){
+    partyLink.innerHTML = `Party ID: ${partyId}`;
+  }
+}
 
-  if (partyId == undefined || partyId == "" || partyId == null) {
-    partyId.innerHTML = "Please enter party id";
-    return false;
-  } 
-
+function loadUsersTeamsData(partyId) {
   loadJSON(function (json) {
+    myList.innerHTML = "";
     allNamesArr = json.users;
     for (let i = 0; i < allNamesArr.length; i++) {
       let div = document.createElement("div");
@@ -78,24 +144,23 @@ joinPartyBtn.addEventListener('click', function (event) {
       console.log("Error in script.js - array firstTeamArr or secondTeamArr is empty");
     }
   }, teamsJsonPath + '/' + partyId);
-
-})
+}
 
 addPlayerBtn.addEventListener('click', function (event) {
   event.preventDefault();
   validateForm();
 })
 
-delAllPlayers.addEventListener('click', function (event) {
+delAllPlayersBtn.addEventListener('click', function (event) {
   event.preventDefault();
-  socket.emit('delAllPlayers');
+  socket.emit('delAllPlayersBtn');
 })
-socket.on('delAllPlayers', function () {
+socket.on('delAllPlayersBtn', function () {
   removeName();
   deleteTeams();
 })
 
-randomizeTeam.addEventListener('click', function (event) {
+randomizeTeamBtn.addEventListener('click', function (event) {
   event.preventDefault();
   random(allNamesArr);
 })
@@ -131,13 +196,13 @@ function deleteTeams() {
 
 function removeName() {
   myList.innerHTML = "";
-  firstTeam.innerHTML = `<span>Team 1:</span>`;
-  secondTeam.innerHTML = `<span> Team 2:</span>`;
+  firstTeam.innerHTML = `<span>Team 1:</span><br>`;
+  secondTeam.innerHTML = `<span>Team 2:</span><br>`;
 }
 
 function removeTeams() {
-  firstTeam.innerHTML = `<span>Team 1:</span>`;
-  secondTeam.innerHTML = `<span> Team 2:</span>`;
+  firstTeam.innerHTML = `<span>Team 1:</span><br>`;
+  secondTeam.innerHTML = `<span>Team 2:</span><br>`;
 }
 
 function remove(el) {
@@ -146,9 +211,7 @@ function remove(el) {
 }
 
 function addPlayer() {
-  let textNode = document.createTextNode(userInput.value);  
-
-
+  let textNode = document.createTextNode(userInput.value);
 
   userInput.value = "";
 
@@ -210,10 +273,10 @@ function random() {
       firstTeamArr = json.firstTeam;
       secondTeamArr = json.secondTeam;
       createTeam(firstTeamArr, secondTeamArr);
-      socket.emit('randomizeTeam', json);
+      socket.emit('randomizeTeamBtn', json);
     }, teamsJsonPath);
   };
-  socket.on('randomizeTeam', function (data) {
+  socket.on('randomizeTeamBtn', function (data) {
     data = JSON.parse(data);
     firstTeamArr = data.firstTeam;
     secondTeamArr = data.secondTeam;
@@ -226,14 +289,14 @@ function createTeam(firstTeamArr, secondTeamArr) {
   let firstStr = firstTeamArr.join(', ');
   let secondStr = secondTeamArr.join(', ');
 
-  firstTeam.innerHTML = `<span>Team 1: </span> <span class="first-team__text">${firstStr}</span>`;
-  secondTeam.innerHTML = `<span>Team 2: </span> <span class="second-team__text">${secondStr}</span>`;
+  firstTeam.innerHTML = `<span>Team 1: </span><br><span class="first-team__text">${firstStr}</span>`;
+  secondTeam.innerHTML = `<span>Team 2: </span><br><span class="second-team__text">${secondStr}</span>`;
 
 }
 
 
 function loadJSON(callback, path) {
-  var xObj = new XMLHttpRequest();
+  let xObj = new XMLHttpRequest();
   xObj.overrideMimeType("application/json");
   xObj.open('GET', path, true);
   xObj.onreadystatechange = function () {
@@ -245,27 +308,27 @@ function loadJSON(callback, path) {
 }
 
 function removeOnePlayer(element) {
-    element.addEventListener('click', function () {
-      let delElem = this.innerHTML;
-      let delElemObj = {
-        "delElem": delElem,
-      }
-      socket.emit('removeOnePlayer', delElemObj);
-      let playerDelFromArr = {
-        "partyId": partyId,
-        "delUser": this.innerHTML
-      }
+  element.addEventListener('click', function () {
+    let delElem = this.innerHTML;
+    let delElemObj = {
+      "delElem": delElem,
+    }
+    socket.emit('removeOnePlayer', delElemObj);
+    let playerDelFromArr = {
+      "partyId": partyId,
+      "delUser": this.innerHTML
+    }
 
-      request.open("POST", usersJsonPath);
-      request.setRequestHeader("Content-Type", "application/json;charset=UTF-8");
-      request.send(JSON.stringify(playerDelFromArr));
-      request.onload = () => {
-        if (request.status === 200) {
-        } else {
-          console.log(`error ${request.status} ${request.statusText}`);
-        };
+    request.open("POST", usersJsonPath);
+    request.setRequestHeader("Content-Type", "application/json;charset=UTF-8");
+    request.send(JSON.stringify(playerDelFromArr));
+    request.onload = () => {
+      if (request.status === 200) {
+      } else {
+        console.log(`error ${request.status} ${request.statusText}`);
       };
-    })
+    };
+  })
 }
 socket.on('removeOnePlayer', function (data) {
   data = JSON.parse(data);
@@ -279,5 +342,4 @@ socket.on('removeOnePlayer', function (data) {
   });
   removeTeams();
 })
-
 
